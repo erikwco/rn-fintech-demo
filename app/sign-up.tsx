@@ -2,7 +2,8 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingVi
 import React, { useState } from 'react'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+import { useSignUp } from '@clerk/clerk-expo';
 
 // -----------------------------------------------------------
 // Render
@@ -14,9 +15,27 @@ const SignUpPage = () => {
 
   // keyboard offset control 
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 90 : 0;
+  const router = useRouter();
+  const { signUp } = useSignUp();
 
-  // signun function
-  const onSignup = async () => { }
+  // signun function using clerk
+  const onSignup = async () => {
+    const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+    try {
+      // signup by phone
+      await signUp!.create({
+        phoneNumber: fullPhoneNumber,
+      });
+      signUp!.preparePhoneNumberVerification();
+      // wait for verification
+      router.push({
+        pathname: '/verify/[phone]',
+        params: { phone: fullPhoneNumber },
+      });
+    } catch (error) {
+      console.error('Error signin up:', error);
+    }
+  }
 
 
 

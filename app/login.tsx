@@ -1,9 +1,10 @@
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
 
 
 enum SignInType {
@@ -22,23 +23,57 @@ const LoginPage = () => {
   const [countryCode, setCountryCode] = useState('+503');
 
   // keyboard offset control 
+  const router = useRouter();
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 90 : 0;
+  const { signIn } = useSignIn();
 
   // signun function
   const onSignin = async (type: SignInType) => {
-    switch (type) {
-      case SignInType.Phone:
-        console.log('log in by phone');
-        break;
-      case SignInType.Email:
-        console.log('log in by email');
-        break;
-      case SignInType.Apple:
-        console.log('log in by apple');
-        break;
-      case SignInType.Google:
-        console.log('log in by google');
-        break;
+    try {
+      switch (type) {
+        case SignInType.Phone:
+          const fullPhoneNumber = `${countryCode}${phoneNumber}`;
+          // we check which factors are available, and passing the phone 
+          // we can check if the country is allowed
+          const { supportedFirstFactors } = await signIn!.create({
+            identifier: fullPhoneNumber,
+          });
+
+          const firstPhoneFactor: any = supportedFirstFactors.find((factor: any) => {
+            return factor.strategy === 'phone_code';
+          });
+
+          const { phoneNumberId } = firstPhoneFactor;
+          await signIn!.prepareFirstFactor({
+            strategy: 'phone_code',
+            phoneNumberId,
+          })
+
+
+          // wait for verification
+          router.push({
+            pathname: '/verify/[phone]',
+            params: { phone: fullPhoneNumber, signin: 'true' },
+          });
+
+          break;
+        case SignInType.Email:
+          console.log('log in by email');
+          break;
+        case SignInType.Apple:
+          console.log('log in by apple');
+          break;
+        case SignInType.Google:
+          console.log('log in by google');
+          break;
+      }
+    } catch (error) {
+      console.log('SignIn error:', JSON.stringify(error, null, 2));
+      if (isClerkAPIResponseError(error)) {
+        if (error.errors[0].code === 'form_identifier_not_found') {
+          Alert.alert('Error', error.errors[0].message);
+        }
+      }
     }
   }
 

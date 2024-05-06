@@ -1,7 +1,8 @@
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { createJSONStorage, devtools, persist } from "zustand/middleware";
 import { zustandStorage } from "./mmkv-storage";
 
+// Define el objeto tipo transacción
 export interface Transaction {
   id: string;
   amount: number;
@@ -9,6 +10,7 @@ export interface Transaction {
   title: string;
 }
 
+// Operaciones sobre las transacciones
 export interface BalanceState {
   transactions: Array<Transaction>;
   runTransaction: (transaction: Transaction) => void;
@@ -16,22 +18,24 @@ export interface BalanceState {
   clearTransactions: () => void;
 }
 
+// Store persistido en zustand
 export const useBalanceStore = create<BalanceState>()(
-  persist((set, get) => ({
-    transactions: [],
-    runTransaction: (transaction: Transaction) => {
-      set((state) => ({ transactions: [...state.transactions, transaction] }));
-    },
-    balance: () => {
-      return get().transactions.reduce((total, transaction) => total + transaction.amount, 0);
-    },
-    clearTransactions: () => {
-      set({ transactions: [] });
-    }
-  }), {
-    name: 'balance',
-    storage: createJSONStorage(() => zustandStorage),
-  })
+  devtools(
+    persist((set, get) => ({
+      transactions: [],
+      runTransaction: (transaction: Transaction) => {
+        set((state) => ({ transactions: [...state.transactions, transaction] }));
+      },
+      balance: () => {
+        return get().transactions.reduce((total, transaction) => total + transaction.amount, 0);
+      },
+      clearTransactions: () => {
+        set({ transactions: [] });
+      }
+    }), {
+      name: 'balance',
+      storage: createJSONStorage(() => zustandStorage),
+    }))
 );
 
 

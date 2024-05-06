@@ -6,16 +6,31 @@ import DropDownMenu from '@/components/DropDownMenu';
 import { useBalanceStore } from '@/store/balanceStore';
 import { defaultStyles } from '@/constants/Styles';
 import { Ionicons } from '@expo/vector-icons';
+import WidgetList from '@/components/SortableList/WidgetList';
 
 const HomeProtectedPage = () => {
   const { balance, runTransaction, transactions, clearTransactions } = useBalanceStore();
 
+  const getTransactionDescription = (amount: number) => {
+    if (amount === 0) {
+      return 'Not allowed amount';
+    } else if (amount > 0) {
+      return 'Money Deposited'
+    } else {
+      return 'Money Withdrawn'
+    }
+  }
+
   const AddMoney = () => {
+    let amount = Math.floor(Math.random() * 2000) * (Math.random() > 0.5 ? 1 : -1);
+    if (amount < 0 && balance() < Math.abs(amount)) {
+      amount = 0
+    }
     runTransaction({
       id: Math.random().toString(),
-      amount: Math.floor(Math.random() * 2000) * (Math.random() > 0.5 ? 1 : -1),
+      amount,
       date: new Date(),
-      title: 'Added money'
+      title: getTransactionDescription(amount)
     });
   }
 
@@ -39,28 +54,30 @@ const HomeProtectedPage = () => {
       {/* // Transactions Lists */}
       <Text style={defaultStyles.sectionHeader}>Transactions</Text>
       <View style={styles.transactions}>
+        {/* // Transactions sort((a, b) => b.date.getTime() - a.date.getTime())*/}
         {/* // No transactions */}
         {
-          transactions.length === 0 && (<Text style={{ color: Colors.gray }}>There is no transactions yet!</Text>)
-        }
-        {/* // Transactions */}
-        {
-          transactions.sort((a, b) => b.date.getTime() - a.date.getTime()).map((transaction) => (
-            <View key={transaction.id} style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 16 }}>
-              <View style={styles.circle}>
-                <Ionicons name={`${transaction.amount > 0 ? 'add' : 'remove'}` as "add" | "remove"} size={24} color={Colors.dark} />
+          transactions.length === 0 ? (<Text style={{ color: Colors.gray }}>There is no transactions yet!</Text>) :
+            (transactions.map((tx) => (
+              <View key={tx.id} style={{ flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', gap: 16 }}>
+                <View style={styles.circle}>
+                  <Ionicons name={`${tx.amount > 0 ? 'add' : 'remove'}` as "add" | "remove"} size={24} color={Colors.dark} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: '500' }}>{tx.title}</Text>
+                  <Text style={{ color: Colors.gray, fontSize: 12 }}>{tx.date.toString()}</Text>
+                </View>
+                <View>
+                  <Text>${tx.amount}</Text>
+                </View>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontWeight: '500' }}>{transaction.title}</Text>
-                <Text style={{ color: Colors.gray, fontSize: 12 }}>{transaction.date.toLocaleDateString()}</Text>
-              </View>
-              <View>
-                <Text>${transaction.amount}</Text>
-              </View>
-            </View>
-          ))
+            ))
+            )
         }
       </View>
+      {/* // Widget List */}
+      <Text style={defaultStyles.sectionHeader}>Widgets</Text>
+      <WidgetList />
     </ScrollView>
   )
 }

@@ -75,7 +75,7 @@ function InitialLayout() {
   useEffect(() => {
     // if clerk is loading return
     if (!isLoaded) return;
-
+    console.log("IsSigned status => ", isSignedIn);
     // check if we are on the protected folder
     const inAuthGroup = segments[0] === '(protected)';
     if (isSignedIn && !inAuthGroup) {

@@ -7,9 +7,11 @@ import { useBalanceStore } from '@/store/balanceStore';
 import { defaultStyles } from '@/constants/Styles';
 import { Ionicons } from '@expo/vector-icons';
 import WidgetList from '@/components/SortableList/WidgetList';
+import { useHeaderHeight } from '@react-navigation/elements';
 
 const HomeProtectedPage = () => {
   const { balance, runTransaction, transactions, clearTransactions } = useBalanceStore();
+  const headerHeight = useHeaderHeight();
 
   const getTransactionDescription = (amount: number) => {
     if (amount === 0) {
@@ -35,9 +37,10 @@ const HomeProtectedPage = () => {
   }
 
   return (
-    <ScrollView style={{ backgroundColor: Colors.background }}>
+    <ScrollView style={{ backgroundColor: Colors.background }} contentContainerStyle={{ paddingTop: headerHeight }}>
       {/* // Header */}
       <View style={styles.account}>
+        <Text>Current Balance</Text>
         <View style={styles.row}>
           <Text style={styles.balance}>{`${balance()}`}</Text>
           <Text style={styles.currency}>$</Text>
@@ -84,7 +87,7 @@ const HomeProtectedPage = () => {
 
 const styles = StyleSheet.create({
   account: {
-    margin: 80,
+    margin: 40,
     alignItems: 'center'
   },
   row: {

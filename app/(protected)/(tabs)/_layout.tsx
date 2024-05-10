@@ -61,6 +61,9 @@ const ProtectedLayoutPage = () => {
         title: 'Crypto',
         tabBarIcon: ({ color, size }) => (
           <FontAwesome name='bitcoin' size={size} color={color} />
+        ),
+        header: () => (
+          <CustomHeader />
         )
       }} />
     </Tabs>

@@ -7,9 +7,17 @@ import { Link, Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SecureStore from 'expo-secure-store';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import WaitForData from '@/components/WaitForData';
+import { UserInactivityProvider } from '@/context/UserInactivity';
+
+
+// Tanstack Query Client
+// this must be created in the top root layout 
+const queryClient = new QueryClient();
 
 // SECURE AND CACHE THE JWT CACHE
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
@@ -79,14 +87,43 @@ function InitialLayout() {
     // check if we are on the protected folder
     const inAuthGroup = segments[0] === '(protected)';
     if (isSignedIn && !inAuthGroup) {
-      router.replace('/(protected)/(tabs)/home');
+      router.replace('/(protected)/(tabs)/crypto');
     } else if (!isSignedIn) {
       router.replace('/');
     }
   }, [isSignedIn]);
   if (!loaded || !isLoaded) {
-    return <Text>Loading application .....</Text>;
+    return <WaitForData message='Application Loading....' />;
   }
+
+
+  // --------------------------------------------------
+  // Utility functions
+  // --------------------------------------------------
+  const headerLeft = () => (
+    <TouchableOpacity onPress={router.back}>
+      <Ionicons name='arrow-back' size={30} color={Colors.dark} />
+    </TouchableOpacity>
+  );
+
+  const headerRightLogin = () => (
+    <Link href={'/help'} asChild>
+      <TouchableOpacity onPress={router.back}>
+        <Ionicons name='help-circle-outline' size={30} color={Colors.dark} />
+      </TouchableOpacity>
+    </Link>
+  )
+
+  const headerRightCryptoDetail = () => (
+    <View style={{ flexDirection: 'row', gap: 10 }}>
+      <TouchableOpacity>
+        <Ionicons name="notifications-outline" color={Colors.dark} size={24} />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Ionicons name="star-outline" color={Colors.dark} size={24} />
+      </TouchableOpacity>
+    </View>
+  )
 
   return (
     <Stack>
@@ -96,29 +133,15 @@ function InitialLayout() {
         headerBackTitle: '',
         headerShadowVisible: false,
         headerStyle: { backgroundColor: Colors.background },
-        headerRight: () => (
-          <Link href={'/help'} asChild>
-            <TouchableOpacity onPress={router.back}>
-              <Ionicons name='help-circle-outline' size={30} color={Colors.dark} />
-            </TouchableOpacity>
-          </Link>
-        ),
-        headerLeft: () => (
-          <TouchableOpacity onPress={router.back}>
-            <Ionicons name='arrow-back' size={30} color={Colors.dark} />
-          </TouchableOpacity>
-        )
+        headerRight: headerRightLogin,
+        headerLeft: headerLeft
       }} />
       <Stack.Screen name='sign-up' options={{
         title: '',
         headerBackTitle: '',
         headerShadowVisible: false,
         headerStyle: { backgroundColor: Colors.background },
-        headerLeft: () => (
-          <TouchableOpacity onPress={router.back}>
-            <Ionicons name='arrow-back' size={30} color={Colors.dark} />
-          </TouchableOpacity>
-        )
+        headerLeft: headerLeft
       }} />
       <Stack.Screen name='help' options={{
         title: 'Help',
@@ -129,15 +152,27 @@ function InitialLayout() {
         headerBackTitle: '',
         headerShadowVisible: false,
         headerStyle: { backgroundColor: Colors.background },
-        headerLeft: () => (
-          <TouchableOpacity onPress={router.back}>
-            <Ionicons name='arrow-back' size={30} color={Colors.dark} />
-          </TouchableOpacity>
-        )
+        headerLeft: headerLeft
       }} />
       <Stack.Screen name='(protected)/(tabs)' options={{
         headerShown: false,
       }} />
+      <Stack.Screen name='(protected)/crypto/[id]'
+        options={{
+          title: '',
+          headerLeft: headerLeft,
+          headerRight: headerRightCryptoDetail,
+          headerLargeTitle: true,
+          headerTransparent: true
+        }}
+      />
+      <Stack.Screen
+        name='(protected)/(modals)/lock'
+        options={{
+          headerShown: false,
+          animation: 'none'
+        }}
+      />
     </Stack>
   );
 
@@ -146,10 +181,15 @@ function InitialLayout() {
 function RootLayoutNav() {
   return (
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar style='light' />
-        <InitialLayout />
-      </GestureHandlerRootView>
+      <QueryClientProvider client={queryClient}>
+        <UserInactivityProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <StatusBar style='light' />
+            <InitialLayout />
+          </GestureHandlerRootView>
+        </UserInactivityProvider>
+      </QueryClientProvider>
+
     </ClerkProvider>
   );
 }

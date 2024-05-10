@@ -15,6 +15,7 @@ export async function GET(request: ExpoRequest) {
   // );
   // const result = await response.json();
   // return ExpoResponse.json(result.data)
+  // 1,1027,825,1839,5426
 
   return ExpoResponse.json(data);
 }

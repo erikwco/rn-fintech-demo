@@ -36,8 +36,14 @@ const HomeProtectedPage = () => {
     });
   }
 
+  // When we have a custom header usually the height of the header is not 
+  // considered so the contentn in the scrollView is cover by the header
+  // when this happens use: useHeaderHeight() from @react-native/elements 
+  // will return the header height and this must be set via 
+  // this: 
+  // contentContainerStyle={{ paddingTop: headerHeight }}
   return (
-    <ScrollView style={{ backgroundColor: Colors.background }} contentContainerStyle={{ paddingTop: headerHeight }}>
+    <ScrollView style={{ backgroundColor: Colors.background }} >
       {/* // Header */}
       <View style={styles.account}>
         <Text>Current Balance</Text>

@@ -87,7 +87,7 @@ function InitialLayout() {
     // check if we are on the protected folder
     const inAuthGroup = segments[0] === '(protected)';
     if (isSignedIn && !inAuthGroup) {
-      router.replace('/(protected)/(tabs)/crypto');
+      router.replace('/(protected)/(tabs)/home');
     } else if (!isSignedIn) {
       router.replace('/');
     }

@@ -63,6 +63,7 @@ const CryptoDetailPage = () => {
   const { data, status: infoStatus } = useQuery({
     queryKey: ['info', id],
     queryFn: async () => {
+      console.log("id received : ", id)
       const result = await fetch(`/api/info?ids=${id}`).then(res => res.json());
       return result[+id] as CryptoInfo;
     },

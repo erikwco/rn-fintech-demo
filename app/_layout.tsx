@@ -3,10 +3,10 @@ import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { Link, Stack, useRouter, useSegments } from 'expo-router';
+import { Link, Stack, useFocusEffect, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SecureStore from 'expo-secure-store';
@@ -48,6 +48,8 @@ export {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+
+
 // -----------------------------------------------------------------------
 // Initial Render Layout
 // -----------------------------------------------------------------------
@@ -64,11 +66,6 @@ function InitialLayout() {
   // Clerk authentication control flow
   const { isLoaded, isSignedIn } = useAuth();
 
-  // Control if the RootLayout is mounted
-  const [isMounted, setIsMounted] = useState(false);
-  useLayoutEffect(() => {
-    setIsMounted(true);
-  }, [])
 
   // --------------------------------------------------
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -92,7 +89,7 @@ function InitialLayout() {
   useEffect(() => {
     // if clerk is loading return
     if (!isLoaded) return;
-    if (!isMounted) return;
+    if (!loaded) return;
     // check if we are on the protected folder
     const inAuthGroup = segments[0] === '(protected)';
     if (isSignedIn && !inAuthGroup) {
@@ -100,7 +97,7 @@ function InitialLayout() {
     } else if (!isSignedIn) {
       router.replace('/');
     }
-  }, [isSignedIn, isLoaded, isMounted]);
+  }, [isSignedIn, isLoaded, loaded]);
   if (!loaded || !isLoaded) {
     return <WaitForData message='Application Loading....' />;
   }
@@ -199,17 +196,17 @@ function InitialLayout() {
 
 function RootLayoutNav() {
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
         <UserInactivityProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <StatusBar style='light' />
             <InitialLayout />
           </GestureHandlerRootView>
         </UserInactivityProvider>
-      </QueryClientProvider>
+      </ClerkProvider>
+    </QueryClientProvider>
 
-    </ClerkProvider>
   );
 }
 

@@ -20,7 +20,7 @@ const CryptoProtectedPage = () => {
 
 
   // search for the ids to get the info and the the image
-  const ids = currencies.data?.map((currency: Currency) => currency.id).join('');
+  const ids = currencies.data?.map((currency: Currency) => currency.id).join(',');
 
   // get the image of every listing 
   const { data } = useQuery({
@@ -29,28 +29,6 @@ const CryptoProtectedPage = () => {
     enabled: !!ids, // enabled only when ids contains some value
   });
 
-
-  // NOTE: This is before TanstackQuery
-  // const [hasErrors, setHasErrors] = useState(false);
-  // const [listings, setListings] = useState<Currency[]>([]);
-  // useEffect(() => {
-  //   const getListings = async () => {
-  //     const result = await fetch('/api/listings');
-  //     if (result.status === 200) {
-  //       const data = await result.json() as Currency[];
-  //       console.log(data);
-  //       setListings(data);
-  //     } else {
-  //       setHasErrors(true);
-  //     }
-  //   }
-  //   getListings();
-  // }, []);
-  // if (hasErrors) {
-  //   return <View style={{ padding: 6 }}>
-  //     <Text>Listings can't be loaded</Text>
-  //   </View>
-  // }
 
   // contentContainerStyle={{ paddingTop: headerHeight }}
   return (

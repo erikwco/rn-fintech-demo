@@ -1,10 +1,10 @@
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { defaultStyles } from '@/constants/Styles'
 import Colors from '@/constants/Colors';
 import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { isClerkAPIResponseError, useSignIn } from '@clerk/clerk-expo';
+import { isClerkAPIResponseError, useAuth, useSignIn } from '@clerk/clerk-expo';
 
 
 enum SignInType {
@@ -26,6 +26,16 @@ const LoginPage = () => {
   const router = useRouter();
   const keyboardVerticalOffset = Platform.OS === 'ios' ? 90 : 0;
   const { signIn } = useSignIn();
+  const { isSignedIn } = useAuth();
+
+  useEffect(() => {
+
+    if (!isSignedIn) return;
+    if (isSignedIn) {
+      router.replace('/(protected)/(tabs)/home');
+    }
+  }, [isSignedIn])
+
 
   // signun function
   const onSignin = async (type: SignInType) => {

@@ -105,7 +105,7 @@ const CryptoDetailPage = () => {
     return <WaitForData message='Loading information .....' />;
   }
 
-
+  console.log(data)
 
   // -----------------------------------------------------------
   // Utilities
@@ -177,7 +177,7 @@ const CryptoDetailPage = () => {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'Bitcoin' }} />
+      <Stack.Screen options={{ title: 'Coin' }} />
       <SectionList
         style={{ marginTop: headerHeight }}
         contentInsetAdjustmentBehavior="automatic"

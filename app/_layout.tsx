@@ -2,12 +2,12 @@ import Colors from '@/constants/Colors';
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { isLoading, useFonts } from 'expo-font';
-import { Link, Stack, useRouter, useSegments } from 'expo-router';
+import { useFonts } from 'expo-font';
+import { Link, Stack, useFocusEffect, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { TouchableOpacity, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as SecureStore from 'expo-secure-store';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -48,6 +48,11 @@ export {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
+
+
+// -----------------------------------------------------------------------
+// Initial Render Layout
+// -----------------------------------------------------------------------
 function InitialLayout() {
   // fonts loading
   const [loaded, error] = useFonts({
@@ -60,6 +65,7 @@ function InitialLayout() {
   const segments = useSegments();
   // Clerk authentication control flow
   const { isLoaded, isSignedIn } = useAuth();
+
 
   // --------------------------------------------------
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
@@ -83,7 +89,7 @@ function InitialLayout() {
   useEffect(() => {
     // if clerk is loading return
     if (!isLoaded) return;
-    console.log("IsSigned status => ", isSignedIn);
+    if (!loaded) return;
     // check if we are on the protected folder
     const inAuthGroup = segments[0] === '(protected)';
     if (isSignedIn && !inAuthGroup) {
@@ -91,7 +97,7 @@ function InitialLayout() {
     } else if (!isSignedIn) {
       router.replace('/');
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, isLoaded, loaded]);
   if (!loaded || !isLoaded) {
     return <WaitForData message='Application Loading....' />;
   }
@@ -173,6 +179,16 @@ function InitialLayout() {
           animation: 'none'
         }}
       />
+      <Stack.Screen
+        name='(protected)/(modals)/account'
+        options={{
+          presentation: 'transparentModal',
+          animation: 'fade',
+          title: '',
+          headerTransparent: true,
+          headerLeft: headerLeft,
+        }}
+      />
     </Stack>
   );
 
@@ -180,17 +196,17 @@ function InitialLayout() {
 
 function RootLayoutNav() {
   return (
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
         <UserInactivityProvider>
           <GestureHandlerRootView style={{ flex: 1 }}>
             <StatusBar style='light' />
             <InitialLayout />
           </GestureHandlerRootView>
         </UserInactivityProvider>
-      </QueryClientProvider>
+      </ClerkProvider>
+    </QueryClientProvider>
 
-    </ClerkProvider>
   );
 }
 

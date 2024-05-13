@@ -52,8 +52,8 @@
           "faceIdPermission": "Allow $(PRODUCT_NAME) to use Face ID."
         }
       ],
-      [ 
-        "expo-dynamic-app-icon" ,
+      [
+        "expo-dynamic-app-icon",
         {
           "default": {
             "image": "./assets/images/icon.png",
@@ -69,6 +69,8 @@
           }
         }
       ],
+      "expo-asset",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

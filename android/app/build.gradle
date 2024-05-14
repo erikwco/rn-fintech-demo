@@ -161,7 +161,6 @@ dependencies {
         }
     }
 
-
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
     } else {

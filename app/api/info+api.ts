@@ -1,10 +1,9 @@
-import { ExpoRequest, ExpoResponse } from 'expo-router/server';
-
 const API_KEY = process.env.CRYPTO_API_KEY;
 
-export async function GET(request: ExpoRequest) {
-  const ids = request.expoUrl.searchParams.get('ids');
-  console.log(ids);
+export async function GET(request: Request) {
+  const params = new URL(request.url);
+  const ids = params.searchParams.get('ids');
+  console.log("ids >>> ", ids);
   const response = await fetch(
     `https://pro-api.coinmarketcap.com/v2/cryptocurrency/info?id=${ids}`,
     {
@@ -14,7 +13,7 @@ export async function GET(request: ExpoRequest) {
     }
   );
   const result = await response.json();
-  return ExpoResponse.json(result.data)
+  return Response.json(result.data)
 
   // return ExpoResponse.json(data);
 

@@ -1,13 +1,12 @@
-import { ExpoRequest, ExpoResponse } from "expo-router/server";
 
 
-export async function GET(request: ExpoRequest) {
+export async function GET(request: Request) {
   // const res = await fetch('https://api.coinpaprika.com/v1/tickers/btc-bitcoin/historical?start=2024-01-01&interval=1d');
   // const body = await res.json();
   // console.log(body.data)
   // return body.data;
 
-  return ExpoResponse.json(data);
+  return Response.json(data);
 }
 
 const data = [
